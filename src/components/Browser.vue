@@ -2,7 +2,7 @@
     <div class="browser">
         <h1>Search Library</h1>
         <div class="search-bar">
-            <input type="search" v-model="search" v-on:input="searchLibrary()" />
+            <input type="search" v-bind:value="search" v-on:input="onInput" />
         </div>
         <div class="result">
             <p class="result__placeholder" v-if="search.length != 0 && result.length == 0">No book match your search</p>
@@ -22,7 +22,8 @@
 </template>
 
 <script>
-    import axios from '../../node_modules/axios/dist/axios.js'
+    import axios from 'axios/dist/axios.js'
+    import _ from 'lodash'
 
     export default {
         name: 'Browser',
@@ -34,6 +35,12 @@
              }
         },
         methods: {
+            onInput: _.debounce(function(event) {
+                if (this.search != event.target.value) {
+                    this.search = event.target.value;
+                    this.searchLibrary();
+                }
+            }, 200),
             searchLibrary() {
                 //TODO: add throttling
                 console.log(this.search);
@@ -106,10 +113,10 @@
         font-size: 14px;
         color: #4c4c4c;
     }
+</style>
 
+<style>
     .book__match em {
         font-weight: bold;
     }
-
-
 </style>
