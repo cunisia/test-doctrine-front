@@ -7,7 +7,14 @@
         <div class="result">
             <p class="result__placeholder" v-if="search.length != 0 && result.length == 0">No book match your search</p>
             <p class="result__placeholder" v-if="search.length == 0 && result.length == 0">Type some keywords on the search bar to search through the Library :)</p>
-            <ul class="result__list">
+            <div class="result-bar" v-if="result.length > 0">
+                <div class="result-bar__el result-bar__el--nb-result">{{result.length}} results</div>
+                <div class="result-bar__el result-bar__el--sortby">
+                    <label for="sort-by">Sort by: </label>
+                    <b-form-select v-model="sortBy" :options="sortByOptions" id="sort-by" size="sm" class="result-bar__select"></b-form-select>
+                </div>
+            </div>
+            <ul class="result__list" v-if="result.length > 0">
                 <li v-for="r in result" class="book" :set="firstMatchingExtract = getFirstMatchingExtract(r.matches)">
                     <span class="book__title">{{r.item.title}}</span>
                     <ul class="book__metas">
@@ -30,9 +37,20 @@
         data: function() {
             return {
                 search: "",
+                sortBy: "score",
+                sortByOptions: [
+                    { value: 'score', text: 'Accuracy' },
+                    { value: 'author', text: 'Author' },
+                    { value: 'title', text: 'Title' },
+                    { value: 'language', text: 'Language' },
+                ],
                 result: [],
                 loadingError: false
+
              }
+        },
+        watch: {
+            sortBy: function(){this.sortResults();}
         },
         methods: {
             onInput: _.debounce(function(event) {
@@ -61,6 +79,26 @@
             getFirstMatchingExtract(matches) {
                 const matchingExtracts = matches.filter(m => m.key === 'extract');
                 return matchingExtracts.length > 0 ? matchingExtracts[0]:null;
+            },
+            sortResults() {
+                this.result.sort((r1, r2) => {
+                    switch (this.sortBy) {
+                        case 'score':
+                            return  r2.score - r1.score;
+                        case 'author':
+                        case 'title':
+                        case 'language':
+                            if (typeof (r1.item[this.sortBy]) === 'undefined') {
+                                return 1;
+                            }
+                            if (typeof (r2.item[this.sortBy]) === 'undefined') {
+                                return -1;
+                            }
+                            return r1.item[this.sortBy].localeCompare(r2.item[this.sortBy]);
+                        default:
+                            return 0;
+                    }
+                })
             }
         }
     };
@@ -72,11 +110,42 @@
         margin: 40px 0 0;
     }
 
-    .result__list {
-        list-style-type: none;
+    .result {
         max-width: 700px;
         margin: auto;
         margin-top: 32px;
+    }
+
+    .result-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .result-bar__el {
+        display: inline-block;
+    }
+
+    .result-bar__el--nb-result {
+        font-weight: 600;
+    }
+
+    .result-bar__el:not(:first-child) {
+        margin-left: 16px;
+    }
+
+    .result-bar__select {
+        margin-left: 8px;
+        width: auto;
+    }
+
+    .result-bar__select:focus {
+        box-shadow: none;
+    }
+
+    .result__list {
+        list-style-type: none;
+        margin: auto;
         text-align: left;
         padding: 0;
     }
