@@ -6,7 +6,7 @@
                 <input class="header__search-bar" type="search" placeholder="Start typing to search through library..." v-bind:value="search" v-on:input="onInput" />
             </div>
         </header>
-        <main>
+        <main class="main">
             <router-view/>
         </main>
     </div>
@@ -52,7 +52,6 @@
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
         color: #2c3e50;
-        margin-top: 60px;
     }
 
     .header {
@@ -107,7 +106,9 @@
         box-shadow: none;
     }
 
-    main {
-        padding-top: 24px;
+    .main {
+        margin-top: 56px;
+        padding-top: 8px;
+        background-color: #F1F1F1;
     }
 </style>
